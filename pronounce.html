@@ -34,7 +34,7 @@
       var word = prompt("Enter a word").toUpperCase();
       var i = 0;
       while(i < splitContent.length){
-        if(splitContent[i].indexOf(word) > -1 && splitContent[i].charAt(0) == word.charAt(0)){  
+        if(splitContent[i].indexOf(word) == 0){  
           break;
         }
         i++;
@@ -139,6 +139,19 @@
     // phase 4
     function find_additional(pronunciation, dictionary){
         var ret = [];
+        var split_pronunciation = pronunciation.split(" ");
+        for(var i = 0; i < split_pronunciation.length; i++){
+            split_pronunciation.splice(i, 0, "\\w+");
+            var to_search = split_pronunciation.join(" ");
+            var to_add_to_ret = search_dictionary(to_search, dictionary);
+            for(var j = 0; j < to_add_to_ret.length; j++){
+                if(ret.find(word => word == to_add_to_ret[j]) == undefined){
+                    ret.push(to_add_to_ret[j]);
+                }
+            }
+            var index = split_pronunciation.indexOf("\\w+");
+            split_pronunciation.splice(index, 1);
+        }
         return ret;
     }
 
