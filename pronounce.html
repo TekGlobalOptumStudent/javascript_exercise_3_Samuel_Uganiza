@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title></title>
+</head>
+
+<body>
+  <input type="file" id="fileinput" />
+  <script type="text/javascript">
+
+    function readSingleFile(evt) {
+      //Retrieve the first (and only!) File from the FileList object
+      var f = evt.target.files[0];
+
+      if (f) {
+        var r = new FileReader();
+        r.onload = function (e) {
+          var contents = e.target.result;
+          //console.log("Where the content is: ",contents.split("\n"))
+          mainEntry(contents);
+        }
+        console.log(r.readAsText(f));
+      } else {
+        alert("Failed to load file");
+      }
+    }
+    document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+
+    function mainEntry(fileContentLoaded) {
+      //this is an example use
+      //console.log("Where the content is: ",fileContentLoaded.split("\n"))
+      var splitContent = fileContentLoaded.split("\n");
+      var word = prompt("Enter a word").toUpperCase();
+      var i = 0;
+      while(i < splitContent.length){
+        if(splitContent[i].indexOf(word) > -1 && splitContent[i].charAt(0) == word.charAt(0)){  
+          break;
+        }
+        i++;
+      }
+      var result = splitOnSpace(splitContent[i]);
+      print_to_html(result, splitContent);
+    }
+
+    function splitOnSpace(s) {
+      // reset strings
+      var obj = {
+        before: "",
+        after: ""
+      }
+      // accumulate before space
+      var i = 0;
+      while (i < s.length && s[i] != " ") { obj.before += s[i]; i++; }
+      // skip the space
+      i++;
+      // accumulate after space
+      while (i < s.length) { obj.after += s[i]; i++; }
+      return obj;
+    }
+
+    function print_arrays(array, flag){
+        var type = "";
+        switch(flag){
+            default:
+            case 1:
+                type = "Identical: "
+                break;
+            case 2:
+                type = "Replace phoneme: "
+                break;
+            case 3:
+                type = "Add phoneme: "
+                break;
+        }
+        document.write(type);
+        for(var i = 0; i < array.length; i++){
+            document.write(array[i] + " ");
+        }
+        document.write("<br>");
+    }
+
+    function print_to_html(result, dictionary){
+      // phase 1
+      document.write("Entered word: " + result.before + "<br>");
+      document.write("Pronunciation: " + result.after + "<br><br>");
+
+      // phase 2
+      var identical_word_list = find_identical(result.after, dictionary);
+      print_arrays(identical_word_list, 1);
+
+      // phase 3
+      var replaced_phoneme_list = find_replacement(result.after, dictionary);
+      print_arrays(replaced_phoneme_list, 2);
+
+      // phase 4
+      var additional_phoneme_list = find_additional(result.after, dictionary);
+      print_arrays(additional_phoneme_list, 3);
+    }
+
+    function search_dictionary(query, dictionary){
+        var ret = [];
+        var number_of_syllables = query.split(" ").length;
+        for(var i = 0; i < dictionary.length; i++){
+            if(dictionary[i].search(RegExp(query)) > -1){
+                var separated_result = splitOnSpace(dictionary[i]);
+                if(number_of_syllables == separated_result.after.split(" ").length){
+                    ret.push(separated_result.before);
+                }
+            }
+        }
+        return ret;
+    }
+
+    // phase 2
+    function find_identical(pronunciation, dictionary){
+        return search_dictionary(pronunciation, dictionary);
+    }
+
+    // phase 3
+    function find_replacement(pronunciation, dictionary){
+        var ret = [];
+        var split_pronunciation = pronunciation.split(" ");
+        for(var i = 0; i < split_pronunciation.length; i++){
+            var temp = split_pronunciation[i];
+            split_pronunciation[i] = "\w+";
+            var to_search = split_pronunciation.join(" ");
+            ret.push(search_dictionary(to_search, dictionary));
+            split_pronunciation[i] = temp;
+        }
+        return ret;
+    }
+
+    // phase 4
+    function find_additional(pronunciation, dictionary){
+        var ret = [];
+        return ret;
+    }
+
+  </script>
+</body>
+
+</html>
