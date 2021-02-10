@@ -123,9 +123,14 @@
         var split_pronunciation = pronunciation.split(" ");
         for(var i = 0; i < split_pronunciation.length; i++){
             var temp = split_pronunciation[i];
-            split_pronunciation[i] = "\w+";
+            split_pronunciation[i] = "\\w+";
             var to_search = split_pronunciation.join(" ");
-            ret.push(search_dictionary(to_search, dictionary));
+            var to_add_to_ret = search_dictionary(to_search, dictionary);
+            for(var j = 0; j < to_add_to_ret.length; j++){
+                if(ret.find(word => word == to_add_to_ret[j]) == undefined){
+                    ret.push(to_add_to_ret[j]);
+                }
+            }
             split_pronunciation[i] = temp;
         }
         return ret;
