@@ -104,7 +104,7 @@
         for(var i = 0; i < dictionary.length; i++){
             if(dictionary[i].search(RegExp(query)) > -1){
                 var separated_result = splitOnSpace(dictionary[i]);
-                if(number_of_syllables == separated_result.after.split(" ").length){
+                if(number_of_syllables == separated_result.after.split(" ").length && separated_result.before.search(/.*[\d\-%&].*/) == -1){
                     ret.push(separated_result.before);
                 }
             }
