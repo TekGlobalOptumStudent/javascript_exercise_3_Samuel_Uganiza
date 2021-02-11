@@ -113,7 +113,7 @@
 
                 // booleans to check if the word should be added to the return
                 var has_same_number_of_syllables = number_of_syllables == separated_result.after.split(" ").length;
-                var has_special_character = separated_result.before.search(/.*[\d\-%&].*/) > 0;
+                var has_special_character = separated_result.before.search(/[\d\-%&]/) > 0;
                 var is_original_word = word_as_obj.before == separated_result.before;
                 
                 // if this expression results in true, add to return array
