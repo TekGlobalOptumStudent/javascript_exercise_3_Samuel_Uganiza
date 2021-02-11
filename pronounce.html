@@ -59,6 +59,7 @@
       return obj;
     }
 
+    // helper functions
     function print_arrays(array, flag){
         var type = "";
         switch(flag){
@@ -86,25 +87,37 @@
       document.write("Pronunciation: " + result.after + "<br><br>");
 
       // phase 2
-      var identical_word_list = find_identical(result.after, dictionary);
+      var identical_word_list = find_identical(result, dictionary);
       print_arrays(identical_word_list, 1);
 
       // phase 3
-      var replaced_phoneme_list = find_replacement(result.after, dictionary);
+      var replaced_phoneme_list = find_replacement(result, dictionary);
       print_arrays(replaced_phoneme_list, 2);
 
       // phase 4
-      var additional_phoneme_list = find_additional(result.after, dictionary);
+      var additional_phoneme_list = find_additional(result, dictionary);
       print_arrays(additional_phoneme_list, 3);
     }
 
-    function search_dictionary(query, dictionary){
+    function search_dictionary(word_as_obj, dictionary){
         var ret = [];
-        var number_of_syllables = query.split(" ").length;
+        var pronunciation_to_search = word_as_obj.after;
+        var number_of_syllables = pronunciation_to_search.split(" ").length;
         for(var i = 0; i < dictionary.length; i++){
-            if(dictionary[i].search(RegExp(query)) > -1){
+            if(dictionary[i].search(RegExp(pronunciation_to_search)) > -1){
+
+                // create an object of the matching result
+                // separated_result.before is the word itself
+                // separated_result.after is the pronunciation of the word
                 var separated_result = splitOnSpace(dictionary[i]);
-                if(number_of_syllables == separated_result.after.split(" ").length && separated_result.before.search(/.*[\d\-%&].*/) == -1){
+
+                // booleans to check if the word should be added to the return
+                var has_same_number_of_syllables = number_of_syllables == separated_result.after.split(" ").length;
+                var has_special_character = separated_result.before.search(/.*[\d\-%&].*/) > 0;
+                var is_original_word = word_as_obj.before == separated_result.before;
+                
+                // if this expression results in true, add to return array
+                if(has_same_number_of_syllables && !has_special_character && !is_original_word){
                     ret.push(separated_result.before);
                 }
             }
@@ -113,19 +126,24 @@
     }
 
     // phase 2
-    function find_identical(pronunciation, dictionary){
-        return search_dictionary(pronunciation, dictionary);
+    function find_identical(word_as_obj, dictionary){
+        return search_dictionary(word_as_obj, dictionary);
     }
 
     // phase 3
-    function find_replacement(pronunciation, dictionary){
+    function find_replacement(word_as_obj, dictionary){
         var ret = [];
-        var split_pronunciation = pronunciation.split(" ");
+        var word_to_search = {
+            before: "",
+            after: ""
+        }
+        word_to_search.before = word_as_obj.before;
+        var split_pronunciation = word_as_obj.after.split(" ");
         for(var i = 0; i < split_pronunciation.length; i++){
             var temp = split_pronunciation[i];
             split_pronunciation[i] = "\\w+";
-            var to_search = split_pronunciation.join(" ");
-            var to_add_to_ret = search_dictionary(to_search, dictionary);
+            word_to_search.after = split_pronunciation.join(" ");
+            var to_add_to_ret = search_dictionary(word_to_search, dictionary);
             for(var j = 0; j < to_add_to_ret.length; j++){
                 if(ret.find(word => word == to_add_to_ret[j]) == undefined){
                     ret.push(to_add_to_ret[j]);
@@ -137,13 +155,18 @@
     }
 
     // phase 4
-    function find_additional(pronunciation, dictionary){
+    function find_additional(word_as_obj, dictionary){
         var ret = [];
-        var split_pronunciation = pronunciation.split(" ");
+        var word_to_search = {
+            before: "",
+            after: ""
+        }
+        word_to_search.before = word_as_obj.before;
+        var split_pronunciation = word_as_obj.after.split(" ");
         for(var i = 0; i < split_pronunciation.length; i++){
             split_pronunciation.splice(i, 0, "\\w+");
-            var to_search = split_pronunciation.join(" ");
-            var to_add_to_ret = search_dictionary(to_search, dictionary);
+            word_to_search.after = split_pronunciation.join(" ");
+            var to_add_to_ret = search_dictionary(word_to_search, dictionary);
             for(var j = 0; j < to_add_to_ret.length; j++){
                 if(ret.find(word => word == to_add_to_ret[j]) == undefined){
                     ret.push(to_add_to_ret[j]);
