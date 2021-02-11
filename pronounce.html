@@ -31,14 +31,17 @@
       //this is an example use
       //console.log("Where the content is: ",fileContentLoaded.split("\n"))
       var splitContent = fileContentLoaded.split("\n");
+      // splitContent stores all the text in the dictionary.txt separated by lines in an array
+      // The dictionary entries are all in capital letters, and non-dictionary entries begin with ";;;"
       var word = prompt("Enter a word").toUpperCase();
       var i = 0;
       while(i < splitContent.length){
-        if(splitContent[i].indexOf(word) == 0){  
+        if(splitContent[i].indexOf(word) == 0){
           break;
         }
         i++;
       }
+      // splitOnSpace returns an object containing a word and its pronunciation
       var result = splitOnSpace(splitContent[i]);
       print_to_html(result, splitContent);
     }
@@ -81,21 +84,21 @@
         document.write("<br>");
     }
 
-    function print_to_html(result, dictionary){
-      // phase 1
-      document.write("Entered word: " + result.before + "<br>");
-      document.write("Pronunciation: " + result.after + "<br><br>");
+    function print_to_html(word_as_obj, dictionary){
+      // phase 1 (print the pronunciation portion of the word you found)
+      document.write("Entered word: " + word_as_obj.before + "<br>");
+      document.write("Pronunciation: " + word_as_obj.after + "<br><br>");
 
-      // phase 2
-      var identical_word_list = find_identical(result, dictionary);
+      // phase 2 (line 131)
+      var identical_word_list = find_identical(word_as_obj, dictionary);
       print_arrays(identical_word_list, 1);
 
-      // phase 3
-      var replaced_phoneme_list = find_replacement(result, dictionary);
+      // phase 3 (line 139)
+      var replaced_phoneme_list = find_replacement(word_as_obj, dictionary);
       print_arrays(replaced_phoneme_list, 2);
 
-      // phase 4
-      var additional_phoneme_list = find_additional(result, dictionary);
+      // phase 4 (line 172)
+      var additional_phoneme_list = find_additional(word_as_obj, dictionary);
       print_arrays(additional_phoneme_list, 3);
     }
 
@@ -126,11 +129,23 @@
     }
 
     // phase 2
+    /*
+     * Strategy: Use the pronunciation portion of the word to search for other words
+     */
     function find_identical(word_as_obj, dictionary){
         return search_dictionary(word_as_obj, dictionary);
     }
 
     // phase 3
+    /*
+     * Strategy: After getting the pronunciation of the word, logic is as follows:
+     *
+     * 1. Split the pronunciation string into an array holding each phoneme.
+     * 2. Replace a part of that phoneme with proper regex signifying a word (\w+).
+     * 3. Join the array to re-create a pronunciation string.
+     * 4. Use the new pronunciation string to find matching words.
+     * 5. Repeat 1-4 until you have replaced all the phonemes in the original pronunciation.
+     */
     function find_replacement(word_as_obj, dictionary){
         var ret = [];
         var word_to_search = {
@@ -155,6 +170,15 @@
     }
 
     // phase 4
+    /*
+     * Strategy: After getting the pronunciation of the word, logic is as follows:
+     *
+     * 1. Split the pronunciation string into an array holding each phoneme.
+     * 2. Insert proper regex signifying a word (\w+) into the array using .splice();
+     * 3. Join the array to re-create a pronunciation string.
+     * 4. Use the new pronunciation string to find matching words.
+     * 5. Repeat 1-4 until you have inserted into all indices of the original pronunciation.
+     */
     function find_additional(word_as_obj, dictionary){
         var ret = [];
         var word_to_search = {
